@@ -10,31 +10,10 @@ let letterImagesCorrect = {};
 let currentFingerPosition;
 let currentStavePosition;
 let currentLetter;
-let isEntirelyCorrect = false;
-let GFingerPositions = [
-  { name: "G1", y: 350, hovered: false, clicked: false },
-  { name: "G2", y: 412, hovered: false, clicked: false },
-  { name: "G3", y: 450, hovered: false, clicked: false },
-  { name: "G4", y: 511, hovered: false, clicked: false },
-];
-let DFingerPositions = [
-  { name: "D1", y: 350, hovered: false, clicked: false },
-  { name: "D2", y: 412, hovered: false, clicked: false },
-  { name: "D3", y: 450, hovered: false, clicked: false },
-  { name: "D4", y: 511, hovered: false, clicked: false },
-];
-let AFingerPositions = [
-  { name: "A1", y: 350, hovered: false, clicked: false },
-  { name: "A2", y: 412, hovered: false, clicked: false },
-  { name: "A3", y: 450, hovered: false, clicked: false },
-  { name: "A4", y: 511, hovered: false, clicked: false },
-];
-let EFingerPositions = [
-  { name: "E1", y: 350, hovered: false, clicked: false },
-  { name: "E2", y: 412, hovered: false, clicked: false },
-  { name: "E3", y: 450, hovered: false, clicked: false },
-  { name: "E4", y: 511, hovered: false, clicked: false },
-];
+let GFingerPositions;
+let DFingerPositions;
+let AFingerPositions;
+let EFingerPositions;
 
 let fingerPositionNotes = {
   G1: "A",
@@ -84,7 +63,55 @@ function setup() {
   createCanvas(1000, 700);
   imageMode(CENTER);
 
+  let sampler = new Tone.Sampler({
+    A4: "sounds/A_open.m4a",
+  });
+
+  sampler.envelope = {
+    attack: 0.2,
+    decay: 0.5,
+    sustain: 0.5,
+    release: 0.1,
+  };
+  sampler.toMaster();
+
+  var vibrato = new Tone.Vibrato({
+    maxDelay: 0.005,
+    frequency: 5,
+    depth: 0.1,
+  }).toMaster();
+
+  sampler.connect(vibrato);
+
   letterBox = letterBoxDefault;
+
+  GFingerPositions = [
+    new FingerPosition("G1", 350, sampler),
+    new FingerPosition("G2", 412, sampler),
+    new FingerPosition("G3", 450, sampler),
+    new FingerPosition("G4", 511, sampler),
+  ];
+
+  DFingerPositions = [
+    new FingerPosition("D1", 350, sampler),
+    new FingerPosition("D2", 412, sampler),
+    new FingerPosition("D3", 450, sampler),
+    new FingerPosition("D4", 511, sampler),
+  ];
+
+  AFingerPositions = [
+    new FingerPosition("A1", 350, sampler),
+    new FingerPosition("A2", 412, sampler),
+    new FingerPosition("A3", 450, sampler),
+    new FingerPosition("A4", 511, sampler),
+  ];
+
+  EFingerPositions = [
+    new FingerPosition("E1", 350, sampler),
+    new FingerPosition("E2", 412, sampler),
+    new FingerPosition("E3", 450, sampler),
+    new FingerPosition("E4", 511, sampler),
+  ];
 
   strings.push(new ViolinString("G", 217, GFingerPositions));
   strings.push(new ViolinString("D", 237, DFingerPositions));
@@ -95,15 +122,15 @@ function setup() {
   stavePosArray.push(new StavePos("G1", 303));
   stavePosArray.push(new StavePos("G2", 288));
   stavePosArray.push(new StavePos("G3", 275));
-  stavePosArray.push(new StavePos("D", 260));
+  stavePosArray.push(new StavePos("G4", 260));
   stavePosArray.push(new StavePos("D1", 247));
   stavePosArray.push(new StavePos("D2", 233));
   stavePosArray.push(new StavePos("D3", 221));
-  stavePosArray.push(new StavePos("A", 204));
+  stavePosArray.push(new StavePos("D4", 204));
   stavePosArray.push(new StavePos("A1", 193));
   stavePosArray.push(new StavePos("A2", 177));
   stavePosArray.push(new StavePos("A3", 164));
-  stavePosArray.push(new StavePos("E", 148));
+  stavePosArray.push(new StavePos("A4", 148));
   stavePosArray.push(new StavePos("E1", 135));
   stavePosArray.push(new StavePos("E2", 120));
   stavePosArray.push(new StavePos("E3", 105));
@@ -159,7 +186,7 @@ function draw() {
 
   // due to the way the hovers are implemented with pngs, i would need a million
   // more combinations to make it work when one is click and another is hovered.
-  // i donnt have time for that. sorry.
+  // i don't have time for that. sorry.
   if (clickedLetter && clickedLetter.isCorrect) {
     letterBox = letterImagesCorrect[clickedLetter.name];
   } else if (clickedLetter) {
@@ -176,37 +203,63 @@ function draw() {
 }
 
 function mousePressed() {
+  if (Tone.context.state !== "running") {
+    Tone.context.resume();
+  }
+
   // only if mouse is on left side of screen check strings (to prevent unclicking when interacting with stave/notes)
   if (mouseX < 550) {
+    currentFingerPosition = null;
     for (const string of strings) {
       string.onClick();
     }
-    // potentially move some of this logic into stavePos
-    // only the .onClick needs to be in the ifs liam thinks
+    // if mouse is on the stave
   } else if (mouseX >= 550 && mouseY <= 356) {
+    currentStavePosition = null;
     for (const stavePos of stavePosArray) {
       stavePos.onClick();
+      if (stavePos.clicked) currentStavePosition = stavePos;
     }
     // mouse is on the letter box
   } else if (mouseX >= 550 && mouseY > 356) {
+    currentLetter = null;
     for (const letter of letters) {
       letter.onClick();
+      if (letter.clicked) currentLetter = letter;
     }
   }
 
   const clickedString = strings.find((string) => string.getClickedFinger());
-  let currentFingerPosition;
   if (clickedString) {
     currentFingerPosition = clickedString.getClickedFinger();
   }
 
   for (const stavePos of stavePosArray) {
-    stavePos.isCorrect = stavePos.fingerName === currentFingerPosition;
+    stavePos.isCorrect = stavePos.fingerName === currentFingerPosition.name;
   }
 
   for (const letter of letters) {
     letter.isCorrect =
       currentFingerPosition &&
-      fingerPositionNotes[currentFingerPosition] === letter.name;
+      fingerPositionNotes[currentFingerPosition.name] === letter.name;
+  }
+
+  console.log(
+    currentStavePosition?.isCorrect,
+    currentLetter?.isCorrect,
+    currentFingerPosition
+  );
+  // check that all three match - then the finger position is ultimately correct
+  if (
+    currentStavePosition?.isCorrect &&
+    currentLetter?.isCorrect &&
+    currentFingerPosition &&
+    currentStavePosition.fingerName === currentFingerPosition.name &&
+    fingerPositionNotes[currentFingerPosition.name] === currentLetter.name
+  ) {
+    currentFingerPosition.isCorrect = true;
+    currentFingerPosition.isUnlocked = true;
+  } else if (currentFingerPosition && !currentFingerPosition.isUnlocked) {
+    currentFingerPosition.isCorrect = false;
   }
 }
