@@ -15,9 +15,9 @@ class StavePos {
     this.hovered = mx >= 680 && mx <= 874 && abs(my - this.y) < 5.5;
   }
 
-  checkClicked() {
-    return this.clicked;
-  }
+  // checkClicked() {
+  //   return this.clicked;
+  // }
 
   display() {
     if (this.clicked && this.isCorrect) {
@@ -32,12 +32,12 @@ class StavePos {
     }
   }
 
-  displayUnlockedNote() {
-    fill(0, 255, 0);
-    ellipse(748, this.y, 35, 26);
-    this.clicked = !this.clicked;
-    console.log("unlocked note displayed:", this.fingerName, this.clicked);
-  }
+  // displayUnlockedNote() {
+  //   fill(0, 255, 0);
+  //   ellipse(748, this.y, 35, 26);
+  //   this.clicked = !this.clicked;
+  //   console.log("unlocked note displayed:", this.fingerName, this.clicked);
+  // }
 
   onClick() {
     if (this.hovered) {
@@ -47,11 +47,11 @@ class StavePos {
     }
   }
 
-  getClickedPosition() {
-    if (this.clicked) {
-      return this.fingerName;
-    }
-  }
+  // getClickedPosition() {
+  //   if (this.clicked) {
+  //     return this.fingerName;
+  //   }
+  // }
 
   reset() {
     this.clicked = false;

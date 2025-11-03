@@ -46,27 +46,8 @@ class ViolinString {
         ellipse(this.x, f.y, 26);
       }
     }
-
-    // If unlocked, different colour. on click can play noise
   }
 
-  // onClick() {
-  //   for (const f of this.fingerPositions) {
-  //     if (f.hovered) {
-  //       // Only toggle clicked if not unlocked — unlocked fingers should stay active
-  //       if (!f.isUnlocked) {
-  //         f.clicked = !f.clicked;
-  //       }
-  //       // Play sound if unlocked or correct
-  //       if (f.isUnlocked || f.isCorrect) {
-  //         f.playSound();
-  //       }
-  //     } else if (f.clicked) {
-  //       // Only unclick if not unlocked
-  //       f.clicked = false;
-  //     }
-  //   }
-  // }
   onClick() {
     for (const f of this.fingerPositions) {
       if (f.hovered) {
@@ -86,10 +67,5 @@ class ViolinString {
 
   getClickedFinger() {
     return this.fingerPositions.find((f) => f.clicked);
-    // for (const f of this.fingerPositions) {
-    //   if (f.clicked) {
-    //     return f.name;
-    //   }
-    // }
   }
 }

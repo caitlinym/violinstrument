@@ -215,115 +215,131 @@ function mousePressed() {
     Tone.context.resume();
   }
 
+  // Clear any pending reset when clicking a new note
   if (resetTimeout) {
     clearTimeout(resetTimeout);
     resetTimeout = null;
   }
 
-  // only if mouse is on left side of screen check strings (to prevent unclicking when interacting with stave/notes)
+  // Handle clicks on different regions
   if (mouseX < 550) {
-    currentFingerPosition = null;
-    for (const string of strings) {
-      string.onClick();
-    }
-    // if mouse is on the stave
+    // Left side: violin strings
+    handleStringClick();
   } else if (mouseX >= 550 && mouseY <= 356) {
-    currentStavePosition = null;
-    for (const stavePos of stavePosArray) {
-      stavePos.onClick();
-      if (stavePos.clicked) currentStavePosition = stavePos;
-    }
-    // mouse is on the letter box
+    // Stave area
+    handleStaveClick();
   } else if (mouseX >= 550 && mouseY > 356) {
-    currentLetter = null;
-    for (const letter of letters) {
-      letter.onClick();
-      if (letter.clicked) currentLetter = letter;
-    }
+    // Letter box area
+    handleLetterClick();
   }
 
+  // Get the currently clicked finger position
   const clickedString = strings.find((string) => string.getClickedFinger());
-  if (clickedString) {
-    currentFingerPosition = clickedString.getClickedFinger();
+  const newFingerPosition = clickedString
+    ? clickedString.getClickedFinger()
+    : null;
+
+  // Only update currentFingerPosition if we clicked a string
+  if (newFingerPosition) {
+    currentFingerPosition = newFingerPosition;
   }
 
-  // When clicking an unlocked finger position, display associated note and letter
-  if (currentFingerPosition?.isUnlocked) {
-    console.log("displaying unlocked note for:", currentFingerPosition.name);
-
-    // Clear all previous stave and letter selections
-    stavePosArray.forEach((sp) => {
-      sp.clicked = false;
-      sp.isCorrect = false;
-    });
-    letters.forEach((l) => {
-      l.clicked = false;
-      l.isCorrect = false;
-    });
-
-    // Find and display the matching stave position
-    const matchingStavePos = stavePosArray.find(
-      (sp) => sp.fingerName === currentFingerPosition.name
-    );
-    if (matchingStavePos) {
-      matchingStavePos.clicked = true;
-      matchingStavePos.isCorrect = true;
-    }
-
-    // Find and display the matching letter
-    const noteName = fingerPositionNotes[currentFingerPosition.name];
-    const matchingLetter = letters.find((l) => l.name === noteName);
-    if (matchingLetter) {
-      matchingLetter.clicked = true;
-      matchingLetter.isCorrect = true;
-    }
-
-    return; // Exit early so we don't run the learning mode logic below
+  // Handle unlocked finger positions
+  if (currentFingerPosition?.isUnlocked && newFingerPosition) {
+    displayUnlockedNote(currentFingerPosition);
+    return;
   }
 
-  // Learning mode: check correctness when clicking non-unlocked positions
+  // Handle learning mode - check whenever any of the three are set
+  if (currentFingerPosition && !currentFingerPosition.isUnlocked) {
+    handleLearningMode();
+  }
+}
+
+function handleStringClick() {
+  let clickedFinger = null;
+  for (const string of strings) {
+    string.onClick();
+    const finger = string.getClickedFinger();
+    if (finger) clickedFinger = finger;
+  }
+
+  // Reset stave and letters if:
+  // 1. We clicked a different finger position, OR
+  // 2. We clicked on a string but no finger (unclicked)
+  // BUT don't reset if clicking the same unlocked finger twice
+  if (clickedFinger !== currentFingerPosition || !clickedFinger) {
+    // Exception: if both are the same unlocked finger, don't reset
+    if (
+      !(clickedFinger === currentFingerPosition && clickedFinger?.isUnlocked)
+    ) {
+      stavePosArray.forEach((sp) => sp.reset());
+      letters.forEach((letter) => letter.reset());
+    }
+  }
+}
+
+function handleStaveClick() {
   for (const stavePos of stavePosArray) {
-    stavePos.isCorrect = stavePos.fingerName === currentFingerPosition?.name;
+    stavePos.onClick();
+    if (stavePos.clicked) currentStavePosition = stavePos;
   }
+}
 
+function handleLetterClick() {
   for (const letter of letters) {
-    letter.isCorrect =
-      currentFingerPosition &&
-      fingerPositionNotes[currentFingerPosition.name] === letter.name;
+    letter.onClick();
+    if (letter.clicked) currentLetter = letter;
   }
+}
 
-  // check that all three match - then the finger position is ultimately correct
-  if (
+function displayUnlockedNote(fingerPosition) {
+  console.log("displaying unlocked note for:", fingerPosition.name);
+
+  // Reset all stave and letter selections
+  stavePosArray.forEach((sp) => sp.reset());
+  letters.forEach((l) => l.reset());
+
+  // Set correct stave position
+  stavePosArray.forEach((sp) => sp.setCorrectFor(fingerPosition.name));
+
+  // Set correct letter
+  const noteName = fingerPositionNotes[fingerPosition.name];
+  letters.forEach((l) => l.setCorrectFor(noteName));
+}
+
+function handleLearningMode() {
+  // Don't clear selections - just update correctness
+  const noteName = fingerPositionNotes[currentFingerPosition.name];
+  stavePosArray.forEach((sp) =>
+    sp.checkCorrectness(currentFingerPosition.name)
+  );
+  letters.forEach((l) => l.checkCorrectness(noteName));
+
+  // Check if all three match correctly
+  if (checkIfAllCorrect()) {
+    currentFingerPosition.unlock();
+    scheduleReset();
+  } else {
+    currentFingerPosition.isCorrect = false;
+  }
+}
+
+function checkIfAllCorrect() {
+  return (
     currentStavePosition?.isCorrect &&
     currentLetter?.isCorrect &&
     currentFingerPosition &&
     currentStavePosition.fingerName === currentFingerPosition.name &&
     fingerPositionNotes[currentFingerPosition.name] === currentLetter.name
-  ) {
-    currentFingerPosition.isCorrect = true;
-    currentFingerPosition.isUnlocked = true;
-  } else if (currentFingerPosition && !currentFingerPosition.isUnlocked) {
-    currentFingerPosition.isCorrect = false;
-  }
+  );
+}
 
-  // unlock if you click anywhere after currentFingerPosition is correct
-  // Add a small delay so user can see the correct state
-  if (
-    currentFingerPosition?.isCorrect &&
-    currentStavePosition?.isCorrect &&
-    currentLetter?.isCorrect
-  ) {
-    resetTimeout = setTimeout(() => {
-      currentFingerPosition.clicked = false;
-      stavePosArray.forEach((sp) => {
-        sp.clicked = false;
-        sp.isCorrect = false;
-      });
-      letters.forEach((l) => {
-        l.clicked = false;
-        l.isCorrect = false;
-      });
-      resetTimeout = null;
-    }, 1600); // 800ms delay so user can see the green correct state
-  }
+function scheduleReset() {
+  resetTimeout = setTimeout(() => {
+    currentFingerPosition.clicked = false;
+    stavePosArray.forEach((sp) => sp.reset());
+    letters.forEach((l) => l.reset());
+    resetTimeout = null;
+  }, 1300); // 800ms delay so user can see the green correct state
 }
