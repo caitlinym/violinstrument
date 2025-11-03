@@ -16,6 +16,12 @@ let AFingerPositions;
 let EFingerPositions;
 let resetTimeout;
 let sustainMode = false;
+let sustainButton;
+let singButton;
+let recordButton;
+let recordOn = false;
+let recordedNotes = [];
+let playButton;
 
 let fingerPositionNotes = {
   G: "G",
@@ -42,6 +48,7 @@ let fingerPositionNotes = {
 function preload() {
   violinImg = loadImage("violin_cropped.png");
   stave = loadImage("stave_v2.png");
+  controlsText = loadImage("controls.png");
   letterBoxDefault = loadImage("letterBox_default.png");
   letterImagesHover["A"] = loadImage("lettersHover/AGrey.png");
   letterImagesHover["B"] = loadImage("lettersHover/BGrey.png");
@@ -65,7 +72,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(1000, 700);
+  createCanvas(1150, 700);
   imageMode(CENTER);
 
   let sampler = new Tone.Sampler({
@@ -131,15 +138,15 @@ function setup() {
   stavePosArray.push(new StavePos("G1", 303));
   stavePosArray.push(new StavePos("G2", 288));
   stavePosArray.push(new StavePos("G3", 275));
-  stavePosArray.push(new StavePos("G4", 260));
+  stavePosArray.push(new StavePos(["G4", "D"], 260)); // Can be G4 or open D
   stavePosArray.push(new StavePos("D1", 247));
   stavePosArray.push(new StavePos("D2", 233));
   stavePosArray.push(new StavePos("D3", 221));
-  stavePosArray.push(new StavePos("D4", 204));
+  stavePosArray.push(new StavePos(["D4", "A"], 204)); // Can be D4 or open A
   stavePosArray.push(new StavePos("A1", 193));
   stavePosArray.push(new StavePos("A2", 177));
   stavePosArray.push(new StavePos("A3", 164));
-  stavePosArray.push(new StavePos("A4", 148));
+  stavePosArray.push(new StavePos(["A4", "E"], 148)); // Can be A4 or open E
   stavePosArray.push(new StavePos("E1", 135));
   stavePosArray.push(new StavePos("E2", 120));
   stavePosArray.push(new StavePos("E3", 105));
@@ -155,11 +162,25 @@ function setup() {
   letters.push(new Letter("G", 780, 820, false));
   letters.push(new Letter("GSharp", 839, 912, false));
 
-  let button = createButton("sustain mode");
-  button.position(0, 100);
+  sustainButton = createButton("sustain mode");
+  sustainButton.position(1010, 125);
+  sustainButton.addClass("button");
+  sustainButton.mousePressed(sustainModeToggle);
 
-  // Call repaint() when the button is pressed.
-  button.mousePressed(sustainModeToggle);
+  singButton = createButton("sing mode");
+  singButton.position(1010, 185);
+  singButton.addClass("button");
+
+  // add a record button (maybe images). when you click it shows the stop button.
+  recordButton = createButton("record");
+  recordButton.position(1010, 245);
+  recordButton.addClass("button");
+  recordButton.mousePressed(handleRecord);
+
+  playButton = recordButton = createButton("play");
+  recordButton.position(1010, 285);
+  recordButton.addClass("button");
+  recordButton.mousePressed(handlePlay);
 }
 
 function draw() {
@@ -169,6 +190,25 @@ function draw() {
   strokeWeight(5);
   noFill();
   rect(2.5, 2.5, width - 5, height - 5);
+
+  // Controls panel separator line
+  stroke(0);
+  strokeWeight(3);
+  line(1000, 2.5, 1000, height - 2.5);
+
+  // Controls panel heading
+  noStroke();
+  fill(0);
+  textSize(18);
+  textAlign(CENTER, CENTER);
+  textFont("Arial");
+  image(
+    controlsText,
+    1075,
+    72,
+    controlsText.width * 0.5,
+    controlsText.height * 0.5
+  );
 
   // Violin
   image(
@@ -269,6 +309,10 @@ function handleStringClick() {
     string.onClick();
     const finger = string.getClickedFinger();
     if (finger) clickedFinger = finger;
+    // recording logic
+    if (recordOn && finger) {
+      recordedNotes.push(finger);
+    }
   }
 
   // Reset stave and letters if:
@@ -337,7 +381,7 @@ function checkIfAllCorrect() {
     currentStavePosition?.isCorrect &&
     currentLetter?.isCorrect &&
     currentFingerPosition &&
-    currentStavePosition.fingerName === currentFingerPosition.name &&
+    currentStavePosition.matchesFingerName(currentFingerPosition.name) &&
     fingerPositionNotes[currentFingerPosition.name] === currentLetter.name
   );
 }
@@ -348,12 +392,12 @@ function scheduleReset() {
     stavePosArray.forEach((sp) => sp.reset());
     letters.forEach((l) => l.reset());
     resetTimeout = null;
-  }, 1300); // 800ms delay so user can see the green correct state
+  }, 1300); // 1300ms delay so user can see the green correct state ( this was a random time that looked good)
 }
 
 function sustainModeToggle() {
   sustainMode = !sustainMode;
-  console.log(sustainMode);
+  sustainButton.toggleClass("active", sustainMode);
 }
 
 function mouseReleased() {
@@ -363,4 +407,28 @@ function mouseReleased() {
       string.onRelease();
     }
   }
+}
+
+function handleRecord() {
+  recordOn = !recordOn;
+}
+
+function handlePlay() {
+  if (recordedNotes.length === 0) return;
+
+  let index = 0;
+
+  const playNextNote = () => {
+    if (index < recordedNotes.length) {
+      const note = recordedNotes[index];
+      note.playSound();
+      setTimeout(() => {
+        note.stopSound();
+        index++;
+        playNextNote();
+      }, 600); // Play each note for 600ms
+      return;
+    }
+  };
+  playNextNote();
 }

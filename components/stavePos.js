@@ -4,7 +4,8 @@
 
 class StavePos {
   constructor(fingerName, y) {
-    this.fingerName = fingerName;
+    // to handle open strings
+    this.fingerNames = Array.isArray(fingerName) ? fingerName : [fingerName];
     this.y = y;
     this.hovered = false;
     this.clicked = false;
@@ -14,10 +15,6 @@ class StavePos {
   checkHover(mx, my) {
     this.hovered = mx >= 680 && mx <= 874 && abs(my - this.y) < 5.5;
   }
-
-  // checkClicked() {
-  //   return this.clicked;
-  // }
 
   display() {
     if (this.clicked && this.isCorrect) {
@@ -32,13 +29,6 @@ class StavePos {
     }
   }
 
-  // displayUnlockedNote() {
-  //   fill(0, 255, 0);
-  //   ellipse(748, this.y, 35, 26);
-  //   this.clicked = !this.clicked;
-  //   console.log("unlocked note displayed:", this.fingerName, this.clicked);
-  // }
-
   onClick() {
     if (this.hovered) {
       this.clicked = !this.clicked;
@@ -47,25 +37,23 @@ class StavePos {
     }
   }
 
-  // getClickedPosition() {
-  //   if (this.clicked) {
-  //     return this.fingerName;
-  //   }
-  // }
-
   reset() {
     this.clicked = false;
     this.isCorrect = false;
   }
 
   setCorrectFor(fingerName) {
-    if (this.fingerName === fingerName) {
+    if (this.fingerNames.includes(fingerName)) {
       this.clicked = true;
       this.isCorrect = true;
     }
   }
 
   checkCorrectness(fingerName) {
-    this.isCorrect = this.fingerName === fingerName;
+    this.isCorrect = this.fingerNames.includes(fingerName);
+  }
+
+  matchesFingerName(fingerName) {
+    return this.fingerNames.includes(fingerName);
   }
 }
