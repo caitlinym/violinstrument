@@ -65,6 +65,14 @@ class ViolinString {
     }
   }
 
+  onRelease() {
+    for (const f of this.fingerPositions) {
+      if (f.isUnlocked || f.isCorrect) {
+        f.stopSound();
+      }
+    }
+  }
+
   getClickedFinger() {
     return this.fingerPositions.find((f) => f.clicked);
   }

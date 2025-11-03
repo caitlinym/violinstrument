@@ -15,6 +15,7 @@ let DFingerPositions;
 let AFingerPositions;
 let EFingerPositions;
 let resetTimeout;
+let sustainMode = false;
 
 let fingerPositionNotes = {
   G: "G",
@@ -153,6 +154,12 @@ function setup() {
   letters.push(new Letter("FSharp", 700, 761, false));
   letters.push(new Letter("G", 780, 820, false));
   letters.push(new Letter("GSharp", 839, 912, false));
+
+  let button = createButton("sustain mode");
+  button.position(0, 100);
+
+  // Call repaint() when the button is pressed.
+  button.mousePressed(sustainModeToggle);
 }
 
 function draw() {
@@ -342,4 +349,18 @@ function scheduleReset() {
     letters.forEach((l) => l.reset());
     resetTimeout = null;
   }, 1300); // 800ms delay so user can see the green correct state
+}
+
+function sustainModeToggle() {
+  sustainMode = !sustainMode;
+  console.log(sustainMode);
+}
+
+function mouseReleased() {
+  // Stop sound for all finger positions when mouse is released
+  if (!sustainMode) {
+    for (const string of strings) {
+      string.onRelease();
+    }
+  }
 }

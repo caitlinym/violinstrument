@@ -36,7 +36,7 @@ class FingerPosition {
   }
 
   stopSound() {
-    if (this.pitch && sampler.loaded) {
+    if (this.pitch && this.sampler.loaded) {
       // Sampler will repitch the closest sample
       this.sampler.triggerRelease(this.pitch);
     }
