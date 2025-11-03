@@ -27,15 +27,10 @@ class ViolinString {
     strokeWeight(this.hovered || clicked ? 3 : 0);
     line(this.x, 277, this.x, 695);
 
-    // this whole situation needs revamping.
-    // If hovered, show finger positions
     if (this.hovered || clicked) {
       noStroke();
       for (let f of this.fingerPositions) {
-        if (f.isUnlocked) {
-          fill(0, 255, 0, 150);
-          ellipse(this.x, f.y, 26);
-        } else if (f.hovered || f.clicked) {
+        if (f.hovered || f.clicked) {
           fill(255, 180, 255, 250);
           ellipse(this.x, f.y, 26);
         } else {
@@ -45,39 +40,48 @@ class ViolinString {
       }
     }
 
+    for (let f of this.fingerPositions) {
+      if (f.isUnlocked) {
+        fill(0, 255, 0, 150);
+        ellipse(this.x, f.y, 26);
+      }
+    }
+
     // If unlocked, different colour. on click can play noise
   }
 
+  // onClick() {
+  //   for (const f of this.fingerPositions) {
+  //     if (f.hovered) {
+  //       // Only toggle clicked if not unlocked — unlocked fingers should stay active
+  //       if (!f.isUnlocked) {
+  //         f.clicked = !f.clicked;
+  //       }
+  //       // Play sound if unlocked or correct
+  //       if (f.isUnlocked || f.isCorrect) {
+  //         f.playSound();
+  //       }
+  //     } else if (f.clicked) {
+  //       // Only unclick if not unlocked
+  //       f.clicked = false;
+  //     }
+  //   }
+  // }
   onClick() {
     for (const f of this.fingerPositions) {
       if (f.hovered) {
-        // Only toggle clicked if not unlocked — unlocked fingers should stay active
-        if (!f.isUnlocked) {
-          f.clicked = !f.clicked;
-        }
+        // Always toggle clicked state
+        f.clicked = !f.clicked;
+
         // Play sound if unlocked or correct
         if (f.isUnlocked || f.isCorrect) {
           f.playSound();
         }
-      } else if (f.clicked && !f.isUnlocked) {
-        // Only unclick if not unlocked
+      } else if (f.clicked) {
+        // Unclick other fingers (but allow unlocked to stay clicked if needed)
         f.clicked = false;
       }
     }
-
-    // for (const f of this.fingerPositions) {
-    //   if (f.hovered) {
-    //     f.clicked = !f.clicked;
-    //   } else if (f.clicked) {
-    //     f.clicked = false;
-    //   }
-    //   console.log("isCorrect: " + f.isCorrect);
-    //   console.log("isUnlocked: " + f.isUnlocked);
-    //   // change to isUnlocked
-    //   if (f.isUnlocked) {
-    //     f.playSound();
-    //   }
-    // }
   }
 
   getClickedFinger() {

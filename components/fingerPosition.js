@@ -41,4 +41,16 @@ class FingerPosition {
       this.sampler.triggerRelease(this.pitch);
     }
   }
+
+  reset() {
+    if (!this.isUnlocked) {
+      this.clicked = false;
+      this.isCorrect = false;
+    }
+  }
+
+  unlock() {
+    this.isCorrect = true;
+    this.isUnlocked = true;
+  }
 }

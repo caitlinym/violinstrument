@@ -12,7 +12,7 @@ class Letter {
     this.clicked = false;
     this.isCorrect = false;
 
-    if(this.topRow) {
+    if (this.topRow) {
       this.yStart = 474;
       this.yEnd = 523;
     } else {
@@ -22,7 +22,11 @@ class Letter {
   }
 
   checkHover(mx, my) {
-    this.hovered = (mx >= this.xStart && mx <= this.xEnd && my >= this.yStart && my <= this.yEnd);
+    this.hovered =
+      mx >= this.xStart &&
+      mx <= this.xEnd &&
+      my >= this.yStart &&
+      my <= this.yEnd;
     return this.hovered;
   }
 
@@ -31,18 +35,28 @@ class Letter {
       this.clicked = !this.clicked;
     } else if (this.clicked) {
       this.clicked = false;
-    } 
-  }
-
-  getClickedLetterName() {
-    if(this.clicked) {
-      return(this.name);
     }
   }
 
-  // isCorrect(fingerPosition) {
+  getClickedLetterName() {
+    if (this.clicked) {
+      return this.name;
+    }
+  }
 
-  // }
+  reset() {
+    this.clicked = false;
+    this.isCorrect = false;
+  }
 
+  setCorrectFor(noteName) {
+    if (this.name === noteName) {
+      this.clicked = true;
+      this.isCorrect = true;
+    }
+  }
 
+  checkCorrectness(noteName) {
+    this.isCorrect = this.name === noteName;
+  }
 }
