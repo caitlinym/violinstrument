@@ -1,5 +1,5 @@
 class FingerPosition {
-  constructor(name, y, sampler, pitch) {
+  constructor(name, y, sampler, voiceSampler) {
     this.y = y;
     this.name = name;
     this.hovered = false;
@@ -7,7 +7,9 @@ class FingerPosition {
     this.isCorrect = false;
     this.sampler = sampler;
     this.isUnlocked = false;
+    this.voiceSampler = voiceSampler;
     this.pitches = {
+      G: "G3",
       G1: "A3",
       G2: "B3",
       G3: "C4",
@@ -38,13 +40,23 @@ class FingerPosition {
     }
   }
 
-  // playVoice() {
-  //   if (this.pitch && this.sampler.loaded) {
-  //     this.sampler.triggerAttack(this.pitch);
-  //   }
-  // }
+  playVoice() {
+    console.log("Playing voice:", this.name, "->", this.pitch);
+    if (this.pitch && this.voiceSampler.loaded) {
+      this.voiceSampler.triggerAttack(this.pitch);
+    }
+  }
+
+  stopVoice() {
+    console.log("Stopping voice for", this.name);
+    if (this.pitch && this.voiceSampler.loaded) {
+      // Sampler will repitch the closest sample
+      this.voiceSampler.triggerRelease(this.pitch);
+    }
+  }
 
   stopSound() {
+    console.log("Stopping sound for", this.name);
     if (this.pitch && this.sampler.loaded) {
       // Sampler will repitch the closest sample
       this.sampler.triggerRelease(this.pitch);
@@ -58,8 +70,18 @@ class FingerPosition {
     }
   }
 
-  unlock() {
+  unlock(singMode) {
     this.isCorrect = true;
     this.isUnlocked = true;
+
+    console.log("Unlocking and playing sound for", this.name);
+
+    // Play celebration sound with fixed duration (doesn't respond to mouse release)
+    if (this.pitch && this.sampler.loaded) {
+      this.sampler.triggerAttackRelease(this.pitch, "2"); // 2 seconds duration
+    }
+    if (singMode && this.pitch && this.voiceSampler.loaded) {
+      this.voiceSampler.triggerAttackRelease(this.pitch, "2"); // 2 seconds duration
+    }
   }
 }

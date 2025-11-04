@@ -48,27 +48,42 @@ class ViolinString {
     }
   }
 
-  onClick() {
+  onClick(singModeActive) {
     for (const f of this.fingerPositions) {
       if (f.hovered) {
-        // Always toggle clicked state
-        f.clicked = !f.clicked;
-
-        // Play sound if unlocked or correct
-        if (f.isUnlocked || f.isCorrect) {
+        // If it's unlocked and already clicked, don't toggle off
+        if (f.isUnlocked && f.clicked) {
+          // Just play the sound again, don't toggle
           f.playSound();
+          if (singModeActive) {
+            f.playVoice();
+          }
+        } else {
+          // Normal toggle behavior
+          f.clicked = !f.clicked;
+
+          // Play sound if unlocked or correct
+          if (f.isUnlocked || f.isCorrect) {
+            f.playSound();
+            if (singModeActive) {
+              f.playVoice();
+            }
+          }
         }
       } else if (f.clicked) {
-        // Unclick other fingers (but allow unlocked to stay clicked if needed)
+        // Unclick other fingers (including unlocked ones when clicking elsewhere)
         f.clicked = false;
       }
     }
   }
 
-  onRelease() {
+  onRelease(singModeActive) {
     for (const f of this.fingerPositions) {
       if (f.isUnlocked || f.isCorrect) {
         f.stopSound();
+        if (singModeActive) {
+          f.stopVoice();
+        }
       }
     }
   }

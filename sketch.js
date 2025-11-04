@@ -22,6 +22,7 @@ let recordButton;
 let recordOn = false;
 let recordedNotes = [];
 let playButton;
+let singMode = false;
 
 let fingerPositionNotes = {
   G: "G",
@@ -79,9 +80,26 @@ function setup() {
     A4: "sounds/D4.m4a",
   });
 
-  // let voiceSampler = new Tone.Sampler({
-  //   A4: "sounds/Voice_D4.m4a",
-  // });
+  let voiceSampler = new Tone.Sampler({
+    G3: "voice/Voice_G3.m4a",
+    A3: "voice/Voice_A3.m4a",
+    B3: "voice/Voice_B3.m4a",
+    C4: "voice/Voice_C.m4a",
+    D4: "voice/Voice_D.m4a",
+    E4: "voice/Voice_E.m4a",
+    "F#4": "voice/Voice_FSharp.m4a",
+    G4: "voice/Voice_G.m4a",
+    A4: "voice/Voice_A.m4a",
+    B4: "voice/Voice_B.m4a",
+    "C#4": "voice/Voice_CSharp.m4a",
+    D5: "voice/Voice_D.m4a",
+    E5: "voice/Voice_E.m4a",
+    "F#5": "voice/Voice_FSharp.m4a",
+    "G#5": "voice/Voice_GSharp.m4a",
+    A5: "voice/Voice_A.m4a",
+    B5: "voice/Voice_B.m4a",
+  });
+  voiceSampler.toMaster();
 
   sampler.envelope = {
     attack: 0.2,
@@ -102,35 +120,35 @@ function setup() {
   letterBox = letterBoxDefault;
 
   GFingerPositions = [
-    new FingerPosition("G", 255, sampler),
-    new FingerPosition("G1", 350, sampler),
-    new FingerPosition("G2", 412, sampler),
-    new FingerPosition("G3", 450, sampler),
-    new FingerPosition("G4", 511, sampler),
+    new FingerPosition("G", 255, sampler, voiceSampler),
+    new FingerPosition("G1", 350, sampler, voiceSampler),
+    new FingerPosition("G2", 412, sampler, voiceSampler),
+    new FingerPosition("G3", 450, sampler, voiceSampler),
+    new FingerPosition("G4", 511, sampler, voiceSampler),
   ];
 
   DFingerPositions = [
-    new FingerPosition("D", 255, sampler),
-    new FingerPosition("D1", 350, sampler),
-    new FingerPosition("D2", 412, sampler),
-    new FingerPosition("D3", 450, sampler),
-    new FingerPosition("D4", 511, sampler),
+    new FingerPosition("D", 255, sampler, voiceSampler),
+    new FingerPosition("D1", 350, sampler, voiceSampler),
+    new FingerPosition("D2", 412, sampler, voiceSampler),
+    new FingerPosition("D3", 450, sampler, voiceSampler),
+    new FingerPosition("D4", 511, sampler, voiceSampler),
   ];
 
   AFingerPositions = [
-    new FingerPosition("A", 255, sampler),
-    new FingerPosition("A1", 350, sampler),
-    new FingerPosition("A2", 412, sampler),
-    new FingerPosition("A3", 450, sampler),
-    new FingerPosition("A4", 511, sampler),
+    new FingerPosition("A", 255, sampler, voiceSampler),
+    new FingerPosition("A1", 350, sampler, voiceSampler),
+    new FingerPosition("A2", 412, sampler, voiceSampler),
+    new FingerPosition("A3", 450, sampler, voiceSampler),
+    new FingerPosition("A4", 511, sampler, voiceSampler),
   ];
 
   EFingerPositions = [
-    new FingerPosition("E", 255, sampler),
-    new FingerPosition("E1", 350, sampler),
-    new FingerPosition("E2", 412, sampler),
-    new FingerPosition("E3", 450, sampler),
-    new FingerPosition("E4", 511, sampler),
+    new FingerPosition("E", 255, sampler, voiceSampler),
+    new FingerPosition("E1", 350, sampler, voiceSampler),
+    new FingerPosition("E2", 412, sampler, voiceSampler),
+    new FingerPosition("E3", 450, sampler, voiceSampler),
+    new FingerPosition("E4", 511, sampler, voiceSampler),
   ];
 
   strings.push(new ViolinString("G", 217, GFingerPositions));
@@ -174,6 +192,7 @@ function setup() {
   singButton = createButton("sing mode");
   singButton.position(1010, 185);
   singButton.addClass("button");
+  singButton.mousePressed(handleSingToggle);
 
   // Create styled sustain button
   // Record button with icon
@@ -229,8 +248,39 @@ function draw() {
     violinImg.height * 1.825
   );
 
+  if (currentFingerPosition == null) {
+    // Instruction box
+    stroke(0);
+    strokeWeight(3);
+    fill(255);
+    rect(30, 30, 150, 90, 8); // Added rounded corners (8px radius)
+
+    // Draw text
+    noStroke();
+    fill(0);
+    textSize(16);
+    textAlign(CENTER, TOP);
+    textFont("Arial");
+    text("Select a finger position on the violin to begin", 32, 45, 140);
+  }
+
   image(stave, 740, 190, stave.width * 0.5, stave.height * 0.5);
+
+  // Draw glowing yellow border if stavePos not selected
+  if (currentFingerPosition && !currentStavePosition) {
+    stroke(255, 215, 0, 150); // Yellow with some transparency
+    strokeWeight(6);
+    noFill();
+    rect(550, 38, 380, 302, 5); // Box around stave area
+  }
+
   image(letterBox, 740, 520, letterBox.width * 0.5, letterBox.height * 0.5);
+  if (currentFingerPosition && !currentLetter) {
+    stroke(255, 215, 0, 150); // Yellow with some transparency
+    strokeWeight(6);
+    noFill();
+    rect(550, 369, 380, 302, 5); // Box around letter area
+  }
 
   for (const string of strings) {
     string.checkHover(mouseX, mouseY);
@@ -304,6 +354,7 @@ function mousePressed() {
   // Handle unlocked finger positions
   if (currentFingerPosition?.isUnlocked && newFingerPosition) {
     displayUnlockedNote(currentFingerPosition);
+    scheduleReset();
     return;
   }
 
@@ -316,13 +367,19 @@ function mousePressed() {
 function handleStringClick() {
   let clickedFinger = null;
   for (const string of strings) {
-    string.onClick();
+    string.onClick(singMode);
     const finger = string.getClickedFinger();
     if (finger) clickedFinger = finger;
     // recording logic
     if (recordOn && finger && finger.isUnlocked) {
       recordedNotes.push(finger);
     }
+  }
+
+  // If we clicked a different finger than before, clear the current stave and letter
+  if (clickedFinger && clickedFinger !== currentFingerPosition) {
+    currentStavePosition = null;
+    currentLetter = null;
   }
 
   // Reset stave and letters if:
@@ -359,6 +416,10 @@ function displayUnlockedNote(fingerPosition) {
   stavePosArray.forEach((sp) => sp.reset());
   letters.forEach((l) => l.reset());
 
+  // Clear current selections
+  currentStavePosition = null;
+  currentLetter = null;
+
   // Set correct stave position
   stavePosArray.forEach((sp) => sp.setCorrectFor(fingerPosition.name));
 
@@ -377,7 +438,7 @@ function handleLearningMode() {
 
   // Check if all three match correctly
   if (checkIfAllCorrect()) {
-    currentFingerPosition.unlock();
+    currentFingerPosition.unlock(singMode);
     scheduleReset();
   } else {
     currentFingerPosition.isCorrect = false;
@@ -399,8 +460,10 @@ function scheduleReset() {
     currentFingerPosition.clicked = false;
     stavePosArray.forEach((sp) => sp.reset());
     letters.forEach((l) => l.reset());
+    currentStavePosition = null;
+    currentLetter = null;
     resetTimeout = null;
-  }, 1300); // 1300ms delay so user can see the green correct state ( this was a random time that looked good)
+  }, 5000); // delay so user can see the green correct state ( this was a random time that looked good)
 }
 
 function sustainModeToggle() {
@@ -412,7 +475,7 @@ function mouseReleased() {
   // Stop sound for all finger positions when mouse is released
   if (!sustainMode) {
     for (const string of strings) {
-      string.onRelease();
+      string.onRelease(singMode);
     }
   }
 }
@@ -442,11 +505,17 @@ function handlePlay() {
       const note = recordedNotes[index];
       displayUnlockedNote(note);
       note.playSound();
+      if (singMode) {
+        note.playVoice();
+      }
       setTimeout(() => {
         note.stopSound();
+        if (singMode) {
+          note.stopVoice();
+        }
         index++;
         playNextNote();
-      }, 600); // Play each note for 600ms
+      }, 800); // Play each note for 800ms
     } else {
       playButton.removeClass("playing");
       playButton.removeAttribute("disabled");
@@ -455,4 +524,9 @@ function handlePlay() {
   playNextNote();
 
   console.log("Playback complete");
+}
+
+function handleSingToggle() {
+  singMode = !singMode;
+  singButton.toggleClass("active", singMode);
 }
