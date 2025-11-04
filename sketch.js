@@ -79,6 +79,10 @@ function setup() {
     A4: "sounds/D4.m4a",
   });
 
+  // let voiceSampler = new Tone.Sampler({
+  //   A4: "sounds/Voice_D4.m4a",
+  // });
+
   sampler.envelope = {
     attack: 0.2,
     decay: 0.5,
@@ -171,16 +175,22 @@ function setup() {
   singButton.position(1010, 185);
   singButton.addClass("button");
 
-  // add a record button (maybe images). when you click it shows the stop button.
-  recordButton = createButton("record");
+  // Create styled sustain button
+  // Record button with icon
+  recordButton = createButton("");
   recordButton.position(1010, 245);
   recordButton.addClass("button");
+  recordButton.addClass("icon-button");
+  recordButton.addClass("record-button");
   recordButton.mousePressed(handleRecord);
 
-  playButton = recordButton = createButton("play");
-  recordButton.position(1010, 285);
-  recordButton.addClass("button");
-  recordButton.mousePressed(handlePlay);
+  // Play button with icon
+  playButton = createButton("");
+  playButton.position(1010, 305);
+  playButton.addClass("button");
+  playButton.addClass("icon-button");
+  playButton.addClass("play-button");
+  playButton.mousePressed(handlePlay);
 }
 
 function draw() {
@@ -310,7 +320,7 @@ function handleStringClick() {
     const finger = string.getClickedFinger();
     if (finger) clickedFinger = finger;
     // recording logic
-    if (recordOn && finger) {
+    if (recordOn && finger && finger.isUnlocked) {
       recordedNotes.push(finger);
     }
   }
@@ -345,8 +355,6 @@ function handleLetterClick() {
 }
 
 function displayUnlockedNote(fingerPosition) {
-  console.log("displaying unlocked note for:", fingerPosition.name);
-
   // Reset all stave and letter selections
   stavePosArray.forEach((sp) => sp.reset());
   letters.forEach((l) => l.reset());
@@ -411,24 +419,40 @@ function mouseReleased() {
 
 function handleRecord() {
   recordOn = !recordOn;
+  if (recordOn) {
+    recordedNotes = []; // Clear previous recordings
+    // Switch to stop button
+    recordButton.removeClass("record-button");
+    recordButton.addClass("stop-button");
+  } else {
+    // Switch back to record button
+    recordButton.removeClass("stop-button");
+    recordButton.addClass("record-button");
+  }
 }
 
 function handlePlay() {
   if (recordedNotes.length === 0) return;
-
+  playButton.addClass("playing");
+  playButton.attribute("disabled", "");
   let index = 0;
 
   const playNextNote = () => {
     if (index < recordedNotes.length) {
       const note = recordedNotes[index];
+      displayUnlockedNote(note);
       note.playSound();
       setTimeout(() => {
         note.stopSound();
         index++;
         playNextNote();
       }, 600); // Play each note for 600ms
-      return;
+    } else {
+      playButton.removeClass("playing");
+      playButton.removeAttribute("disabled");
     }
   };
   playNextNote();
+
+  console.log("Playback complete");
 }

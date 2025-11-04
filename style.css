@@ -27,3 +27,97 @@ canvas {
   background-color: #5ce1e6;
   transform: scale(0.98);
 }
+
+/* Icon button base styles */
+.icon-button {
+  width: 50px;
+  height: 50px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  position: relative;
+}
+
+/* Record button - red circle */
+.record-button::before {
+  content: "";
+  width: 20px;
+  height: 20px;
+  background-color: #ff0000;
+  border-radius: 50%;
+  display: block;
+}
+
+.record-button:hover::before {
+  background-color: #cc0000;
+}
+
+/* Stop button - black square (when recording) */
+.stop-button::before {
+  content: "";
+  width: 18px;
+  height: 18px;
+  background-color: #000000;
+  border-radius: 3px;
+  display: block;
+}
+
+.stop-button {
+  background-color: #ff0000;
+  border-color: #ff0000;
+  animation: pulse 1.5s infinite;
+}
+
+.stop-button::before {
+  background-color: #ffffff;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+/* Play button - triangle */
+.play-button::before {
+  content: "";
+  width: 0;
+  height: 0;
+  border-left: 16px solid #000000;
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent;
+  display: block;
+  margin-left: 3px;
+}
+
+.play-button:hover::before {
+  border-left-color: #333333;
+}
+
+.play-button.playing {
+  background-color: #5ce1e6;
+  border-color: #5ce1e6;
+}
+
+.play-button.playing::before {
+  animation: playing-pulse 0.8s infinite;
+}
+
+@keyframes playing-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.play-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}

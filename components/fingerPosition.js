@@ -38,6 +38,12 @@ class FingerPosition {
     }
   }
 
+  // playVoice() {
+  //   if (this.pitch && this.sampler.loaded) {
+  //     this.sampler.triggerAttack(this.pitch);
+  //   }
+  // }
+
   stopSound() {
     if (this.pitch && this.sampler.loaded) {
       // Sampler will repitch the closest sample
