@@ -40,6 +40,7 @@ let fingerPositionNotes = {
   A2: "CSharp",
   A3: "D",
   A4: "E",
+  E: "E",
   E1: "FSharp",
   E2: "GSharp",
   E3: "A",
@@ -73,7 +74,7 @@ function preload() {
 }
 
 function setup() {
-  createCanvas(1150, 700);
+  createCanvas(1200, 700);
   imageMode(CENTER);
 
   let sampler = new Tone.Sampler({
@@ -91,7 +92,7 @@ function setup() {
     G4: "voice/Voice_G.m4a",
     A4: "voice/Voice_A.m4a",
     B4: "voice/Voice_B.m4a",
-    "C#4": "voice/Voice_CSharp.m4a",
+    "C#5": "voice/Voice_CSharp.m4a",
     D5: "voice/Voice_D.m4a",
     E5: "voice/Voice_E.m4a",
     "F#5": "voice/Voice_FSharp.m4a",
@@ -185,19 +186,19 @@ function setup() {
   letters.push(new Letter("GSharp", 839, 912, false));
 
   sustainButton = createButton("sustain mode");
-  sustainButton.position(1010, 125);
+  sustainButton.position(1033, 120);
   sustainButton.addClass("button");
   sustainButton.mousePressed(sustainModeToggle);
 
   singButton = createButton("sing mode");
-  singButton.position(1010, 185);
+  singButton.position(1033, 200);
   singButton.addClass("button");
   singButton.mousePressed(handleSingToggle);
 
   // Create styled sustain button
   // Record button with icon
   recordButton = createButton("");
-  recordButton.position(1010, 245);
+  recordButton.position(1040, 290);
   recordButton.addClass("button");
   recordButton.addClass("icon-button");
   recordButton.addClass("record-button");
@@ -205,7 +206,7 @@ function setup() {
 
   // Play button with icon
   playButton = createButton("");
-  playButton.position(1010, 305);
+  playButton.position(1105, 290);
   playButton.addClass("button");
   playButton.addClass("icon-button");
   playButton.addClass("play-button");
@@ -233,10 +234,10 @@ function draw() {
   textFont("Arial");
   image(
     controlsText,
-    1075,
+    1095,
     72,
-    controlsText.width * 0.5,
-    controlsText.height * 0.5
+    controlsText.width * 0.7,
+    controlsText.height * 0.7
   );
 
   // Violin
@@ -252,7 +253,7 @@ function draw() {
     // Instruction box
     stroke(0);
     strokeWeight(3);
-    fill(255);
+    fill(color(125, 236, 240));
     rect(30, 30, 150, 90, 8); // Added rounded corners (8px radius)
 
     // Draw text
@@ -312,9 +313,10 @@ function draw() {
     letterBox = letterBoxDefault;
   }
 
-  noStroke();
-  fill(0);
-  text(mouseX + " " + mouseY, mouseX, mouseY);
+  // for debugging
+  // noStroke();
+  // fill(0);
+  // text(mouseX + " " + mouseY, mouseX, mouseY);
 }
 
 function mousePressed() {
@@ -326,6 +328,11 @@ function mousePressed() {
   if (resetTimeout) {
     clearTimeout(resetTimeout);
     resetTimeout = null;
+  }
+
+  // Ignore clicks in the controls panel (right side of screen) - this is because p5 handles buttons separately i've discovered
+  if (mouseX >= 1000) {
+    return;
   }
 
   // Handle clicks on different regions
@@ -393,6 +400,16 @@ function handleStringClick() {
     ) {
       stavePosArray.forEach((sp) => sp.reset());
       letters.forEach((letter) => letter.reset());
+
+      // Clear current selections (removes yellow border highlights)
+      currentStavePosition = null;
+      currentLetter = null;
+
+      // If no finger is selected, also clear currentFingerPosition
+      // This hides yellow borders and shows the instruction box again
+      if (!clickedFinger) {
+        currentFingerPosition = null;
+      }
     }
   }
 }

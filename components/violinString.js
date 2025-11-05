@@ -30,10 +30,17 @@ class ViolinString {
     if (this.hovered || clicked) {
       noStroke();
       for (let f of this.fingerPositions) {
-        if (f.hovered || f.clicked) {
+        if (f.clicked) {
+          noStroke();
+          strokeWeight(2);
+          fill(255, 150, 255, 255);
+          ellipse(this.x, f.y, 28);
+        } else if (f.hovered) {
+          noStroke();
           fill(255, 180, 255, 250);
           ellipse(this.x, f.y, 26);
         } else {
+          noStroke();
           fill(242, 121, 240, 200);
           ellipse(this.x, f.y, 20);
         }
@@ -43,7 +50,7 @@ class ViolinString {
     for (let f of this.fingerPositions) {
       if (f.isUnlocked) {
         fill(0, 255, 0, 150);
-        ellipse(this.x, f.y, 26);
+        ellipse(this.x, f.y, 28);
       }
     }
   }

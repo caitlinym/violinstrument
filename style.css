@@ -17,6 +17,7 @@ canvas {
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
+  width: 128px;
 }
 
 .button:hover {
