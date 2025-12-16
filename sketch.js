@@ -77,8 +77,25 @@ function setup() {
   createCanvas(1200, 700);
   imageMode(CENTER);
 
+  // just the A4 was left as it sounded better when the sampler repitched the open A
   let sampler = new Tone.Sampler({
+    // G3: "sounds/G.m4a",
+    // A3: "sounds/G1.m4a",
+    // B3: "sounds/G2.m4a",
+    // C4: "sounds/G3.m4a",
+    // D4: "sounds/D.m4a",
+    // E4: "sounds/D2.m4a",
+    // "F#4": "sounds/D3.m4a",
+    // G4: "sounds/D3.m4a",
     A4: "sounds/D4.m4a",
+    // B4: "sounds/A1.m4a",
+    // C5: "sounds/A2.m4a",
+    // D5: "sounds/A3.m4a",
+    // E5: "sounds/E.m4a",
+    // "F#5": "sounds/E1.m4a",
+    // "G#5": "sounds/E2.m4a",
+    // A5: "sounds/E3.m4a",
+    // B5: "sounds/E4.m4a",
   });
 
   let voiceSampler = new Tone.Sampler({
