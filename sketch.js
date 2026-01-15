@@ -62,15 +62,15 @@ function preload() {
   letterImagesHover["G"] = loadImage("lettersHover/GGrey.png");
   letterImagesHover["GSharp"] = loadImage("lettersHover/GSharpGrey.png");
 
-  letterImagesCorrect["A"] = loadImage("LettersCorrect/AGreen.png");
-  letterImagesCorrect["B"] = loadImage("LettersCorrect/BGreen.png");
-  letterImagesCorrect["C"] = loadImage("LettersCorrect/CGreen.png");
-  letterImagesCorrect["CSharp"] = loadImage("LettersCorrect/CSharpGreen.png");
-  letterImagesCorrect["D"] = loadImage("LettersCorrect/DGreen.png");
-  letterImagesCorrect["E"] = loadImage("LettersCorrect/EGreen.png");
-  letterImagesCorrect["FSharp"] = loadImage("LettersCorrect/FSharpGreen.png");
-  letterImagesCorrect["G"] = loadImage("LettersCorrect/GGreen.png");
-  letterImagesCorrect["GSharp"] = loadImage("LettersCorrect/GSharpGreen.png");
+  letterImagesCorrect["A"] = loadImage("lettersCorrect/AGreen.png");
+  letterImagesCorrect["B"] = loadImage("lettersCorrect/BGreen.png");
+  letterImagesCorrect["C"] = loadImage("lettersCorrect/CGreen.png");
+  letterImagesCorrect["CSharp"] = loadImage("lettersCorrect/CSharpGreen.png");
+  letterImagesCorrect["D"] = loadImage("lettersCorrect/DGreen.png");
+  letterImagesCorrect["E"] = loadImage("lettersCorrect/EGreen.png");
+  letterImagesCorrect["FSharp"] = loadImage("lettersCorrect/FSharpGreen.png");
+  letterImagesCorrect["G"] = loadImage("lettersCorrect/GGreen.png");
+  letterImagesCorrect["GSharp"] = loadImage("lettersCorrect/GSharpGreen.png");
 }
 
 function setup() {
