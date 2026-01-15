@@ -107,14 +107,14 @@ function setup() {
     E4: "voice/Voice_E.m4a",
     "F#4": "voice/Voice_FSharp.m4a",
     G4: "voice/Voice_G.m4a",
-    A4: "voice/Voice_A.m4a",
+    A4: "voice/voice_A.m4a",
     B4: "voice/Voice_B.m4a",
     "C#5": "voice/Voice_CSharp.m4a",
     D5: "voice/Voice_D.m4a",
     E5: "voice/Voice_E.m4a",
     "F#5": "voice/Voice_FSharp.m4a",
     "G#5": "voice/Voice_GSharp.m4a",
-    A5: "voice/Voice_A.m4a",
+    A5: "voice/voice_A.m4a",
     B5: "voice/Voice_B.m4a",
   });
   voiceSampler.toMaster();
