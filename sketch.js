@@ -50,7 +50,7 @@ let fingerPositionNotes = {
 function preload() {
   violinImg = loadImage("violin_cropped.png");
   stave = loadImage("stave_v2.png");
-  controlsText = loadImage("controls.png");
+  controlsText = loadImage("Controls.png");
   letterBoxDefault = loadImage("letterBox_default.png");
   letterImagesHover["A"] = loadImage("lettersHover/AGrey.png");
   letterImagesHover["B"] = loadImage("lettersHover/BGrey.png");
